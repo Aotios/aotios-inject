@@ -18,7 +18,7 @@ class AotiosInjectComponentRegistrar : CompilerPluginRegistrar() {
     override fun ExtensionStorage.registerExtensions(configuration: CompilerConfiguration) {
         val messageCollector = configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
         val logging = true
-        FirExtensionRegistrarAdapter.registerExtension(FirExtensionRegistrar(DebugLogger(logging, messageCollector)))
+        //FirExtensionRegistrarAdapter.registerExtension(FirExtensionRegistrar(DebugLogger(logging, messageCollector)))
         IrGenerationExtension.registerExtension(AotiosInjectIRExtension(DebugLogger(logging, messageCollector)))
     }
 }

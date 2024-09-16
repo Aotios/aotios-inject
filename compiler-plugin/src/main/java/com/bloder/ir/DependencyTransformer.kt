@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.ir.expressions.IrFunctionExpression
 import org.jetbrains.kotlin.ir.expressions.IrReturn
 import org.jetbrains.kotlin.ir.expressions.IrTypeOperatorCall
 import org.jetbrains.kotlin.ir.types.classFqName
+import org.jetbrains.kotlin.ir.util.getPackageFragment
 import org.jetbrains.kotlin.ir.util.statements
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
@@ -33,6 +34,7 @@ internal class DependencyTransformer(
     }
 
     private fun transformModuleCall(expression: IrCall) {
+        debugLogger.log("MODULE - ${expression.symbol.owner.getPackageFragment().packageFqName}")
         val arg = expression.valueArguments.firstOrNull()
         (arg as? IrFunctionExpression)?.function?.body?.statements?.forEach { statement ->
             (statement as? IrTypeOperatorCall)?.acceptChildrenVoid(this)
@@ -41,6 +43,7 @@ internal class DependencyTransformer(
     }
 
     private fun transformDependencyCall(expression: IrCall) {
+        debugLogger.log("DEPENDENCY - ${expression.symbol.owner.getPackageFragment().packageFqName}")
         val functionExpression = (expression.valueArguments.firstOrNull() as? IrFunctionExpression)?.function
         val returnExpression = (functionExpression?.body?.statements?.lastOrNull() as? IrReturn)?.value ?: return
         expression.typeArguments.firstOrNull()?.classFqName?.toString()?.let { name ->

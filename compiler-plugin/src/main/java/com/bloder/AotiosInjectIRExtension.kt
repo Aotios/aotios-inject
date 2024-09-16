@@ -10,6 +10,6 @@ internal class AotiosInjectIRExtension(private val debugLogger: DebugLogger) : I
 
     override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
         moduleFragment.accept(DependencyTransformer(debugLogger), null)
-        moduleFragment.transform(SummonTransformer(debugLogger), null)
+        moduleFragment.transform(SummonTransformer(debugLogger, pluginContext), null)
     }
 }
