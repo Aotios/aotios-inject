@@ -1,7 +1,6 @@
 package com.bloder.checker
 
 import com.bloder.DebugLogger
-import com.bloder.dependencies.Dependencies
 import org.jetbrains.kotlin.diagnostics.*
 import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.analysis.checkers.MppCheckerKind
@@ -12,10 +11,12 @@ import org.jetbrains.kotlin.fir.analysis.extensions.FirAdditionalCheckersExtensi
 import org.jetbrains.kotlin.fir.expressions.FirCall
 import org.jetbrains.kotlin.fir.expressions.FirFunctionCall
 import org.jetbrains.kotlin.fir.render
+import org.jetbrains.kotlin.fir.types.classId
 import org.jetbrains.kotlin.fir.types.toConeTypeProjection
 import org.jetbrains.kotlin.fir.types.type
+import org.jetbrains.kotlin.text
 
-internal class FirDependencyChecker(
+internal class AotiosInjectFirDependencyChecker(
     session: FirSession,
     private val debugLogger: DebugLogger
 ) : FirAdditionalCheckersExtension(session) {
@@ -34,8 +35,8 @@ internal class DependencyExpressionChecker(
 
     override fun check(expression: FirCall, context: CheckerContext, reporter: DiagnosticReporter) {
         if (expression is FirFunctionCall && expression.calleeReference.name.asString().contains("dependency")) {
-//            debugLogger.log("Expression 1 ${expression.source?.text} / ${expression.calleeReference.name.asString()} / ${expression.typeArguments.first().render()}")
-            Dependencies.firDependencies.add(expression.typeArguments.first().render())
+            debugLogger.log("Dependency ${expression.source?.text} / ${expression.calleeReference.name.asString()} / ${expression.typeArguments.first().render()}")
+            context.session.aotiosInjectFirSessionComponent.firDependencies.add(expression.typeArguments.first().render())
         }
     }
 }
@@ -46,9 +47,9 @@ internal class SummonExpressionChecker(
 
     override fun check(expression: FirCall, context: CheckerContext, reporter: DiagnosticReporter) {
         if (expression is FirFunctionCall && expression.calleeReference.name.asString().contains("summon")) {
-            if (!Dependencies.firDependencies.contains(expression.typeArguments.first().render())) {
-                if (expression.typeArguments.first().toConeTypeProjection().type?.toString() == "T") return
-//                debugLogger.log("Expression 2 ${expression.typeArguments.first().toConeTypeProjection().type}")
+            debugLogger.log("Summon ${expression.typeArguments.first().toConeTypeProjection().type} / ${expression.typeArguments.firstOrNull()?.toConeTypeProjection()?.type?.classId}")
+            if (!context.session.aotiosInjectFirSessionComponent.firDependencies.contains(expression.typeArguments.first().render())) {
+                if (expression.typeArguments.firstOrNull()?.toConeTypeProjection()?.type?.classId == null) return
                 reporter.reportOn(
                     expression.source,
                     AotiosFirCheckerError.SUMMON_DEPENDENCY_NOT_FOUND_ERROR,
@@ -56,8 +57,6 @@ internal class SummonExpressionChecker(
                     context,
                     SourceElementPositioningStrategies.DEFAULT
                 )
-            } else {
-                Dependencies.firDependencies.remove(expression.typeArguments.first().render())
             }
         }
     }

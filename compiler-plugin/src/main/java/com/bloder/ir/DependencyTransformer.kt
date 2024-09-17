@@ -1,7 +1,7 @@
 package com.bloder.ir
 
 import com.bloder.DebugLogger
-import com.bloder.dependencies.Dependencies
+import com.bloder.dependencies.AotiosInjectDependencies
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.backend.js.utils.typeArguments
 import org.jetbrains.kotlin.ir.backend.js.utils.valueArguments
@@ -47,7 +47,7 @@ internal class DependencyTransformer(
         val functionExpression = (expression.valueArguments.firstOrNull() as? IrFunctionExpression)?.function
         val returnExpression = (functionExpression?.body?.statements?.lastOrNull() as? IrReturn)?.value ?: return
         expression.typeArguments.firstOrNull()?.classFqName?.toString()?.let { name ->
-            Dependencies.dependencies[name] = returnExpression
+            AotiosInjectDependencies.dependencies[name] = returnExpression
         }
     }
 }

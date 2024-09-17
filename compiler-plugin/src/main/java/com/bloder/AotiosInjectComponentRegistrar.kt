@@ -1,6 +1,6 @@
 package com.bloder
 
-import com.bloder.checker.FirExtensionRegistrar
+import com.bloder.checker.AotiosInjectFirExtensionRegistrar
 import com.google.auto.service.AutoService
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
@@ -17,8 +17,7 @@ class AotiosInjectComponentRegistrar : CompilerPluginRegistrar() {
 
     override fun ExtensionStorage.registerExtensions(configuration: CompilerConfiguration) {
         val messageCollector = configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
-        val logging = true
-        //FirExtensionRegistrarAdapter.registerExtension(FirExtensionRegistrar(DebugLogger(logging, messageCollector)))
-        IrGenerationExtension.registerExtension(AotiosInjectIRExtension(DebugLogger(logging, messageCollector)))
+        FirExtensionRegistrarAdapter.registerExtension(AotiosInjectFirExtensionRegistrar(DebugLogger(messageCollector)))
+        IrGenerationExtension.registerExtension(AotiosInjectIRExtension(DebugLogger(messageCollector)))
     }
 }

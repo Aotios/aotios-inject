@@ -15,7 +15,7 @@ object AotiosFirCheckerError : BaseDiagnosticRendererFactory() {
 
     val SUMMON_DEPENDENCY_NOT_FOUND_ERROR by error1<KtElement, String>()
 
-    override val MAP: KtDiagnosticFactoryToRendererMap = rendererMap{ map ->
+    override val MAP: KtDiagnosticFactoryToRendererMap = rendererMap { map ->
         map.put(
             factory = SUMMON_DEPENDENCY_NOT_FOUND_ERROR,
             message = "No dependency declared for `{0}` type",
